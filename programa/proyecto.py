@@ -3,9 +3,10 @@ import calendar
 from datetime import datetime
 import json
 import os
+import time
 
 # Cargamos horarios
-with open('/workspaces/Proyecto-Python/programa/clase.json', 'r', encoding='utf-8') as f:
+with open("/workspaces/Proyecto-Python/programa/clase.json", "r", encoding="utf-8") as f:
     datos_horario = json.load(f)
 
 # Lista para los exámenes pendientes
@@ -16,6 +17,11 @@ ahora = datetime.now()
 año = ahora.year
 mes = ahora.month
 hora = ahora.hour
+
+#Días de la semana y día actual
+dias_semana = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
+dia_hoy = dias_semana[ahora.weekday()]
+
 
 # Saludos 
 print("\n" + "*"*50)
@@ -32,13 +38,15 @@ print(calendar.month(año, mes))
 
 
 # Eligir curso
-print('ELIGE LA CLASE DONDE ESTÁS')
-print('1. 1.º de BACH A (letras)')
-print('2. 1.º de BACH A (ciencias)')
-print('3. 1.º de BACH B (letras)')
-print('4. 1.º de BACH B (ciencias)')
-print()
-opcion = input('Introduce el número de tu clase (1-4) ')
+input("Pulsa Enter para empezar seleccionando tu clase.")
+
+print("\nELIGE LA CLASE DONDE ESTÁS")
+print("1. 1.º de BACH A (letras)")
+print("2. 1.º de BACH A (ciencias)")
+print("3. 1.º de BACH B (letras)")
+print("4. 1.º de BACH B (ciencias)\n")
+
+opcion = input("Introduce el número de tu clase (1-4) ")
 
 curso = {
     "1": "1.º BACH A (letras)",
@@ -49,8 +57,9 @@ curso = {
 
 curso_usuario =curso.get(opcion)
 
+
 if not curso_usuario:
-    print('Opción inválida. Reinicia el programa')
+    print("Opción inválida. Reinicia el programa")
     exit()
 
 
@@ -67,16 +76,15 @@ disponibilidad_estudio = {
     "Domingo": 0.0
 }
 
-dias_semana = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
 
-print("\n" + "-"*30)
+print("\n" + "="*30)
 print(" CONFIGURAR HORAS DISPONIBLES")
-print("-"*30)
-print("Introduce cuántas horas reales puedes estudiar cada día:")
+print("="*30)
+print("\nIntroduce cuántas horas reales puedes estudiar cada día:\n (Nota: puedes usar 1 número decimal (0.0) pero usa el punto para separar).")
 
 for dia in dias_semana:
     while True: 
-        res = input(f"¿Cuántas horas tienes para estudiar el {dia}? (puedes usar un número decimal, pero usa la coma (,) para separar): ")
+        res = input(f"¿Cuántas horas tienes para estudiar el {dia.lower()}?")
 
         try:
             horas = float(res) #para que lo pase a número
@@ -110,15 +118,15 @@ while True:
     print("\n" + "*"*25)
 
 
-    accion = input('¿Qué quieres hacer?')
+    accion = input("¿Qué quieres hacer?")
 
     if accion == "1":  #aquí el usuario introducirá los exámenes.
         meter_examen = True
          #bucle para añadir varios exámenes a la vez sin tener que pasar por el menú.
         while  meter_examen:
-            print ('\nAÑADIR NUEVO EXAMEN.')
-            asignatura = input('¿De qué asignatura es?: ')
-            dificultad = input('Elige la dificultad: \n1. Difícil\n2. Media\n3. Fácil\n')
+            print ("\nAÑADIR NUEVO EXAMEN.")
+            asignatura = input("¿De qué asignatura es?: ")
+            dificultad = input("Elige la dificultad: \n1. Difícil\n2. Media\n3. Fácil\n")
 
             # Según el nivel de dificultad hay diferente cantidad de horas que se va a necesitar añadir
             if dificultad == "1":
@@ -140,10 +148,10 @@ while True:
             
                 #Guardamos exámenes pendientes:
                 examenes_pendientes.append({
-                    'asig': asignatura,
-                    'dif': dificultad,
-                  'dias': diasrestantes,
-                 'horas': horas_necesarias
+                    "asig": asignatura,
+                    "dif": dificultad,
+                  "dias": diasrestantes,
+                 "horas": horas_necesarias
                  })
 
 
@@ -151,20 +159,20 @@ while True:
                 print("Formato de fecha incorrecto.") #por si el valor de la fecha es incorrecto.
 
             
-            otra = input('\n¿Quieres añadir otro examen? (s/n): ').lower() # pregunta si volver a añadir a otro examen o ir al menú. .lower() para que dé igual mayúsucla/minúscula.
-            if otra != 's':
+            otra = input("\n¿Quieres añadir otro examen? (s/n): ").lower() # pregunta si volver a añadir a otro examen o ir al menú. .lower() para que dé igual mayúsucla/minúscula.
+            if otra != "s":
                 meter_examen = False
                 print("Volviendo al menú principal...")
         
 
         #Volver al menú
-        input('\nPresiona Enter para regresar al menú...')
+        input("\nPresiona Enter para regresar al menú...")
             
 
     elif accion == "2":
         #Consultar horario, cargando el día de la semana
         
-        dia_hoy = dias_semana[ahora.weekday()]
+        
         horario_clase = datos_horario.get(curso_usuario, {})
 
         # Vamos a enseñar el horario de hoy o el de mañana, según si ya han terminado las clases o no
@@ -174,15 +182,19 @@ while True:
 
         if clases_terminadas:
             # Calculamos el día de mañana 
-            dia_manana = (ahora.weekday() + 1) % 7
+            indice_manana = (ahora.weekday() + 1) % 7 #conseguimos el día de mañana pero en número
+            dia_manana = dias_semana[indice_manana] #lo pasamos a texto (Lunes, Martes)
             info_dia = horario_clase.get(dia_manana)
-            print(f"\nLas clases de hoy ya terminaron")
+        
+            
+            info_dia = horario_clase.get(dia_manana)
+            print(f"Las clases de hoy ya terminaron")
             
             if info_dia:
                 print("\n")
                 print(f"====INFORMACIÓN PARA MAÑANA {dia_manana.upper()}====")
-                print(f"Materías de hoy: : {info_dia['materias']}")
-                print(f"Hora de salida: {info_dia['fin']}")
+                print(f"Materias de mañana: {info_dia["materias"]}")
+                print(f"Hora de salida: {info_dia["fin"]}")
 
 
             else:
@@ -194,8 +206,8 @@ while True:
             info_dia = horario_clase.get(dia_hoy)
 
             if info_dia:
-                print(f"Materias: {info_dia['materias']}")
-                print(f"Hora de salida: {info_dia['fin']}")
+                print(f"Materias: {info_dia["materias"]}")
+                print(f"Hora de salida: {info_dia["fin"]}")
             else:
                 print("No hay clases registradas para hoy. ¡Disfruta del descanso!")
         
@@ -203,19 +215,61 @@ while True:
             print("\n ")
             print("\nRECUERDA TUS EXÁMENES:")
             for ex in examenes_pendientes:
-                print(f"- {ex['asig']}: faltan {ex['dias']} días. Necesitarás {ex['horas']} horas para estudiar, aproximadamente")
+                print(f"- {ex["asig"]}: faltan {ex["dias"]} días. Necesitarás {ex["horas"]} horas para estudiar, aproximadamente")
         
         # Para volver al menú-
-        input('\nPresiona Enter para regresar al menú...')
+        input("\nPresiona Enter para regresar al menú...")
 
 
     elif accion == "3":
-        print(n)
+        print("\n" + "="*35)
+        print("   TU PLANIFICACIÓN SEMANAL")
+        print("="*35)
+
+        if not examenes_pendientes:
+            print("No tienes exámenes anotados. ¡Disfruta de tu tiempo libre!")
+        else:
+            puede = disponibilidad_estudio.get(dia_hoy, 0)
+
+            print(f"Hoy {dia_hoy.lower()} tienes disponibles {puede} horas para estudiar.\n")
+
+            suma_debe = 0 #para abrir esta nueva variablr
+
+            for ex in examenes_pendientes:
+
+                debe = round(ex["horas"] / max(1, ex["dias"]), 1) #horas disponibles ÷ días que quedan, siendo round para que solo ponga un decimal round(..., 1) y max 1 para que no divida entre 0
+                suma_debe += debe # (+= sería suma_debe=suma_debe + debe)
+
+                print(f"• {ex["asig"]}:")
+                print(f"  Debes dedicarle hoy: {debe}h")
+                
+                if debe > puede:
+                    print(f"¡OJO! Este examen solo ya supera tus horas de hoy.")
+                print("-" * 20)
+
+            
+            # Resumen final 
+            print(f"\nTOTAL QUE DEBERÍAS ESTUDIAR HOY: {round(suma_debe, 1)}h") #round para que quede bonito.
+            
+            if suma_debe > puede:
+                print(f"No te da tiempo. Te faltan {round(suma_debe - puede, 1)}h.")
+                print("Consejo: Quita horas de ocio y aprovecha bien el tiempo.")
+
+            elif suma_debe == puede:
+                print("Las horas que debes de estudiar hoy son iguales a las que estás disponible.")
+                print("¡Qué bien planificado!")
+            
+            else:
+                print(f"¡Plan perfecto! Te sobrarán {round(puede - suma_debe, 1)}h libres.")
+
+
+        input("\nPresiona Enter para regresar al menú...")   
     
     elif accion == "4":
         print("Saliendo...")
         break
-    
+     
     else:
         print("Opción no válida.")
+        time.sleep(3)
 

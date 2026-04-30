@@ -22,7 +22,7 @@
     },
     "1.º BACH B (letras)": {
       "Lunes": { "inicio": "09:00", "fin": "17:55", "materias": "Economía, Optativa, Historia Mundo Contemp./Griego, Inglés, Matemáticas Aplicadas/Latín, Gallego, Educación Física, Filosofía" },
-      "Martes": { "inicio": "09:00", "fin": "14:25", "materias": "Castellano, Economía, Hora libre, Optativa, Historia Mundo Contemp./Griego, Matemáticas Aplicadas/Latíb" },
+      "Martes": { "inicio": "09:00", "fin": "14:25", "materias": "Castellano, Economía, Hora libre, Optativa, Historia Mundo Contemp./Griego, Matemáticas Aplicadas/Latín" },
       "Miércoles": { "inicio": "09:00", "fin": "14:25", "materias": "Castellano, Economía, Gallego, Educación Física, Matemáticas Aplicadas/Latín, Inglés" },
       "Jueves": { "inicio": "09:00", "fin": "14:25", "materias": "Filosofía, Matemáticas Aplicadas/Latín, Historia Mundo Contemp./Griego, Economía, Optativa, Gallego" },
       "Viernes": { "inicio": "09:00", "fin": "14:25", "materias": "Inglés, Historia Mundo Contemp./Griego, Castellano, Filosofía, Educación Física, Optativa" }
