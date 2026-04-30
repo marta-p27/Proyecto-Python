@@ -6,4 +6,4 @@ En este proyecto de Pyhton el objetivo es crear un asistente que, después de se
 El asistente pedirá la elección del horario, de forma que este se cargue y los exámenes pendientes. Así, podrás consultar las asignaturas del día/día siguiente (según la hora que sea), los exámenes pendientes, cuántos dían quedan para ellos... Te dará el tiempo aproximado que deberás dedicarle y te ordenará en un calendario su recomendación de cuándo deberías estudiar.
 
 # Cómo usarlo:
-Asegúrate de añadir el archivo clase.json en la carpeta del proyecto o ajusta la ruta del archivo en el código según tu configuración personal. Esto te permitirá cargar el horario y las asignaturas correctamente para que el asistente te pueda recomendar la organización de tu estudio.
+Asegúrate de añadir el archivo clase.json en la carpeta del proyecto y ajustar la ruta del archivo en el código según tu configuración personal. Esto te permitirá cargar el horario y las asignaturas correctamente para que el asistente te pueda recomendar la organización de tu estudio.
