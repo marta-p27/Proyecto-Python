@@ -84,7 +84,7 @@ print("\nIntroduce cuántas horas reales puedes estudiar cada día:\n (Nota: pue
 
 for dia in dias_semana:
     while True: 
-        res = input(f"¿Cuántas horas tienes para estudiar el {dia.lower()}?")
+        res = input(f"¿Cuántas horas tienes para estudiar el {dia.lower()}? ")
 
         try:
             horas = float(res) #para que lo pase a número
@@ -108,17 +108,14 @@ while True:
     print("      MENÚ DEL ASISTENTE")
     print("="*30)
     print("1. Añadir nuevo examen/tarea")
-    print("2. Ver horario y horas libres de hoy")
+    print("2. Ver horario, horas libres de hoy y calendario")
     print("3. Ver tu plan de estudio recomendado.")
     print("4. Salir")
 
-    #Calendario
-    print("\n" + "*"*25)
-    print(calendar.month(año, mes))
-    print("\n" + "*"*25)
+   
 
 
-    accion = input("¿Qué quieres hacer?")
+    accion = input("¿Qué quieres hacer? Introduce el número correspondiente (1-4): ")
 
     if accion == "1":  #aquí el usuario introducirá los exámenes.
         meter_examen = True
@@ -138,29 +135,32 @@ while True:
             else:
                 print("Valor no válido, asignando 3h por defecto")
                 horas_necesarias = 3
-            fecha_texto = input('Fecha del examen (DD/MM/AAAA): ')
-
-            try:
-                # Fecha en modo de texto a modo de fecha real
-                fecha_examen = datetime.strptime(fecha_texto, "%d/%m/%Y")
-                diasrestantes = (fecha_examen - ahora).days + 1
-                print(f"Examen de {asignatura} guardado.\nNecesitarás dedicarle, aproximadamente, {horas_necesarias} horas. Faltan {diasrestantes} días.")
             
-                #Guardamos exámenes pendientes:
-                examenes_pendientes.append({
+
+            while True:
+                fecha_texto = input('Fecha del examen (DD/MM/AAAA): ')
+                try:
+                # Fecha en modo de texto a modo de fecha real
+                    fecha_examen = datetime.strptime(fecha_texto, "%d/%m/%Y")
+                    diasrestantes = (fecha_examen - ahora).days + 1
+                    print(f"Examen de {asignatura} guardado.\nNecesitarás dedicarle, aproximadamente, {horas_necesarias} horas. Faltan {diasrestantes} días.")
+            
+                    #Guardamos exámenes pendientes:
+                    examenes_pendientes.append({
                     "asig": asignatura,
                     "dif": dificultad,
                   "dias": diasrestantes,
                  "horas": horas_necesarias
-                 })
-
-
-            except ValueError:
-                print("Formato de fecha incorrecto.") #por si el valor de la fecha es incorrecto.
+                    })
+                
+                    break #salimos del bucle de la fecha al estar todo bien
+                
+                except ValueError:
+                    print("Formato de fecha incorrecto.") #por si el valor de la fecha es incorrecto.
 
             
-            otra = input("\n¿Quieres añadir otro examen? (s/n): ").lower() # pregunta si volver a añadir a otro examen o ir al menú. .lower() para que dé igual mayúsucla/minúscula.
-            if otra != "s":
+            respuesta = input("\n¿Quieres añadir otro examen? (s/n): ").lower() # pregunta si volver a añadir a otro examen o ir al menú. .lower() para que dé igual mayúsucla/minúscula.
+            if respuesta != "s":
                 meter_examen = False
                 print("Volviendo al menú principal...")
         
@@ -170,9 +170,9 @@ while True:
             
 
     elif accion == "2":
-        #Consultar horario, cargando el día de la semana
-        
-        
+
+
+        #Consultar horario, cargando el día de la semana 
         horario_clase = datos_horario.get(curso_usuario, {})
 
         # Vamos a enseñar el horario de hoy o el de mañana, según si ya han terminado las clases o no
@@ -217,9 +217,21 @@ while True:
             for ex in examenes_pendientes:
                 print(f"- {ex["asig"]}: faltan {ex["dias"]} días. Necesitarás {ex["horas"]} horas para estudiar, aproximadamente")
         
-        # Para volver al menú-
-        input("\nPresiona Enter para regresar al menú...")
+        respuesta = input("¿Quieres ver el calendario de este mes y el mes que viene? (s/n)")
+        if respuesta == "s":
+             #Calendario
+            print("\n" + "*"*25)
+            print(calendar.month(año, mes))
+            print("*"*25)
+            print(calendar.month(año, mes+1))
+            print("*"*25)
 
+
+
+        # Para volver al menú.
+        input("\nPresiona Enter para regresar al menú...").lower()
+
+        
 
     elif accion == "3":
         print("\n" + "="*35)
@@ -271,5 +283,5 @@ while True:
      
     else:
         print("Opción no válida.")
-        time.sleep(3)
+        time.sleep(1.5)
 
