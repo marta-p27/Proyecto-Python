@@ -3,7 +3,14 @@ import calendar
 from datetime import datetime, timedelta
 import json
 import os
-import time
+import time 
+import sys
+
+# 
+def resource_path(nombre):
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, nombre)
+    return os.path.join(BASE_DIR, nombre)
 
 #Formateo de horas para que sea 1:30 y no 1.5h
 def formatear_horas(decimal):
@@ -17,15 +24,11 @@ def formatear_horas(decimal):
     #    - '2' obliga a que el número tenga mínimo 2 dígitos de ancho.
     #    - 'd' le dice que es un número entero (dígito).
 
-# Pruebas:
-print(formatear_horas(1.5))   # 1:30
-print(formatear_horas(2.75))  # 2:45
-print(formatear_horas(0.08))  # 0:04
 
 # Cargamos horarios y el json de datos(si existe)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-RUTA_HORARIO = os.path.join(BASE_DIR, "clase.json")
-RUTA_DATOS_USUARIO = os.path.join(BASE_DIR, "datos_usuario.json")
+RUTA_HORARIO = resource_path("clase.json")
+RUTA_DATOS_USUARIO = resource_path("datos_usuario.json")
 
 with open(RUTA_HORARIO, "r", encoding="utf-8") as f:
     datos_horario = json.load(f)
@@ -177,7 +180,7 @@ while True:
     print("="*30)
     print("1. Añadir nuevo examen")
     print("2. Eliminar o editar exámenes guardados")
-    print("3. Ver horario, horas libres de hoy y calendario")
+    print("3. Ver horario, exámenes pendientes y calendario")
     print("4. Ver tu plan de estudio recomendado.")
     print("5. Editar disponibilidad")
     print("6. Salir")
@@ -407,7 +410,7 @@ while True:
 
 
         # Para volver al menú.
-        input("\nPresiona Enter para regresar al menú...").lower()
+        input("\nPresiona Enter para regresar al menú...")
 
         
 
@@ -536,23 +539,23 @@ while True:
 
         if dis_opcion == "1":
             dia_cambio = input("\n¿Qué día quieres editar? (p.e: Lunes, Martes, Miércoles)").strip().capitalize()
-            cambiar_hora = True 
+             
             while True:
                 if dia_cambio in disponibilidad_estudio:
-                    while True:
-                        horas = int(input(f"¿Cuántas horas tienes para estudiar el {dia_cambio.lower()}"))
+                    
+                    horas = float(input(f"¿Cuántas horas tienes para estudiar el {dia_cambio.lower()}"))
 
-                        try: 
-                            if 0 <= horas <= 24:
-                                disponibilidad_estudio[dia_cambio] = horas
-                                break 
+                    try: 
+                        if 0 <= horas <= 24:
+                            disponibilidad_estudio[dia_cambio] = horas
+                            break 
             
-                            else:
-                                print("Error: Introduce un número entre 0 y 24.")
+                        else:
+                            print("Error: Introduce un número entre 0 y 24.")
                                 
 
-                        except ValueError:
-                            print("Error: Escribe un número válido.")
+                    except ValueError:
+                        print("Error: Escribe un número válido.")
             
                     guardar_todo() 
                     print("\nDisponibilidad guardada correctamente.")
@@ -560,7 +563,7 @@ while True:
                 else:
                     print("Día no válido. Asegúrate de escribirlo bien (ej: Miércoles).")
                     time.sleep(1.5)
-                    cambiar_hora = False
+                    break
 
                         
 
@@ -569,7 +572,7 @@ while True:
         if dis_opcion == "2":
             for dia in dias_semana:
                 while True: 
-                    horas = int(input(f"¿Cuántas horas tienes para estudiar el {dia.lower()}? "))
+                    horas = float(input(f"¿Cuántas horas tienes para estudiar el {dia.lower()}? "))
 
                     try:
                         if 0 <= horas <= 24:
