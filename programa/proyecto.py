@@ -5,9 +5,24 @@ import json
 import os
 import time
 
-# Cargamos horarios
+#Formateo de horas para que sea 1:30 y no 1.5h
+def formatear_horas(decimal):
+    horas = int(decimal)
+    minutos = int((decimal % 1) * 60)
+    return f"{horas}:{minutos:02d}"
 
+# :02d significa: 
+    #    - ':' inicia la regla de formato.
+    #    - '0' rellena con ceros a la izquierda si falta espacio.
+    #    - '2' obliga a que el número tenga mínimo 2 dígitos de ancho.
+    #    - 'd' le dice que es un número entero (dígito).
 
+# Pruebas:
+print(formatear_horas(1.5))   # 1:30
+print(formatear_horas(2.75))  # 2:45
+print(formatear_horas(0.08))  # 0:04
+
+# Cargamos horarios y el json de datos(si existe)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 RUTA_HORARIO = os.path.join(BASE_DIR, "clase.json")
 RUTA_DATOS_USUARIO = os.path.join(BASE_DIR, "datos_usuario.json")
@@ -87,6 +102,7 @@ print(calendar.month(año, mes))
 # Eligir curso
 input("Pulsa Enter para empezar. ")
 
+#Si no está seleccionado el cursi
 if not clase_usuario:
     print("\nELIGE LA CLASE DONDE ESTÁS")
     print("1. 1.º de BACH A (letras)")
@@ -115,6 +131,7 @@ if not clase_usuario:
 
 else:
     print(f"Bienvenido de nuevo. Clase actual: {clase_usuario}")
+    time.sleep(3)
 
 
 
@@ -367,7 +384,7 @@ while True:
             print("\n ")
             print("\nRECUERDA TUS EXÁMENES:")
             for ex in examenes_pendientes:
-                print(f"- {ex['asig']}: faltan {ex['dias']} días. Necesitarás {ex['horas']} horas para estudiar, aproximadamente")
+                print(f"· {ex['asig']}: faltan {ex['dias']} días. Necesitarás {ex['horas']} horas para estudiar, aproximadamente")
         
         respuesta = input("¿Quieres ver el calendario de este mes y el mes que viene? (s/n)")
         if respuesta == "s":
@@ -404,88 +421,101 @@ while True:
         if not examenes_pendientes:
             print("No tienes exámenes anotados. ¡Disfruta de tu tiempo libre!")
         else:
-            puede = disponibilidad_estudio.get(dia_hoy, 0)
-
+            puede = disponibilidad_estudio.get(dia_hoy, 0) #obtener la disponibilidad uardada para este día de la semana. si no hay, devuelve 0.
+           
             
+            #Filtro inteligente
+            MAX_DIAS_ANTICIPACION = 14  # Si el examen está a más de 2 semanas, no mandará estudiar aún
+            MIN_HORAS_SESION = 0.5      # Si toca estudiar menos de 30 minutos (0.5h), se ignora para evitar que ponga que estudies 0.1 h
 
-            print(f"Hoy {dia_hoy.lower()} tienes disponibles {puede} horas para estudiar.\n")
+            horas_futuras = []
+            #Lista de disponibilidad futura
+            for i in range(100):
+                fecha = ahora + timedelta(days=i)
 
-            suma_debe = 0 #para abrir esta nueva variablr
+                nombre_dia = dias_semana[fecha.weekday()]
 
+
+                horas = disponibilidad_estudio.get(nombre_dia,0)
+                
+
+                horas_futuras.append({
+                    'fecha': fecha,
+                    'horas': horas,
+                    'dias_hasta_hoy': i
+                })
+
+                horas_totales_examenes = 0
+
+                # Aquí guardaremos lo que se recomienda estudiar HOY
+            planificacion_hoy = []
+            
+            # Recorremos cada examen para calcular su proporción individual
             for ex in examenes_pendientes:
+                fecha_ex = datetime.strptime(ex['fecha'], "%d/%m/%Y")
 
-                fecha_examen = datetime.strptime(ex['fecha'], "%d/%m/%Y")
-                ahora = datetime.now()
-                diasrestantes = (fecha_examen - ahora).days + 1
-
-
-                if ex['dif'] == "1":
-                    diasminimos = 8
+                # Calculamos días limpios restando solo las fechas
+                dias_restantes = (fecha_ex.date() - ahora.date()).days
                 
-                elif ex['dif'] == "2":
-                    diasminimos = 5
-                
-                elif ex['dif'] == "3":
-                    diasminimos = 3
-                
+                # Por si el examen está pasado o muy lejos
+                if 0 <= dias_restantes <= MAX_DIAS_ANTICIPACION:
+                    
+                    # Total de horas de estudio disponibles hasta el examen
+                    disponibilidad_estudio_total = 0
+                    for dia_futuro in horas_futuras:
+                        if dia_futuro['dias_hasta_hoy'] < dias_restantes:
+                            disponibilidad_estudio_total += dia_futuro["horas"]
+                    
+                    # Proporcion de estudio
+                    if disponibilidad_estudio_total > 0 and puede > 0:
 
-                if ex['dif'] == "1" and diasrestantes < 8:
-                    debe = round(ex['horas'] / max(1, diasrestantes), 1) #horas disponibles ÷ días que quedan, siendo round para que solo ponga un decimal round(..., 1) y max 1 para que no divida entre 0
-                    suma_debe += debe # (+= sería suma_debe=suma_debe + debe)
-
-                    print(f"\n• {ex['asig']} ({ex['fecha']}):")
-                    print(f"  Debes dedicarle hoy: {debe}h")
-                
-                    if debe > puede:
-                        print(f"¡OJO! Este examen solo ya supera tus horas de hoy.")
-                 
-                    print("-" * 20)
-
-                elif ex['dif'] == "2" and diasrestantes < 5:
-                    debe = round(ex['horas'] / max(1, {diasrestantes}), 1) #horas disponibles ÷ días que quedan, siendo round para que solo ponga un decimal round(..., 1) y max 1 para que no divida entre 0
-                    suma_debe += debe
-
-                    print(f"\n• {ex['asig']} ({ex['fecha']}):")
-                    print(f"  Debes dedicarle hoy: {debe}h")
-                
-                    if debe > puede:
-                        print(f"¡OJO! Este examen solo ya supera tus horas de hoy.")
-                 
-                    print("-" * 20)
-
-                elif ex['dif'] == "3" and diasrestantes < 3:
-
-                    debe = round(ex['horas'] / max(1, {diasrestantes}), 1) #horas disponibles ÷ días que quedan, siendo round para que solo ponga un decimal round(..., 1) y max 1 para que no divida entre 0
-                    suma_debe += debe
-
-                    print(f"\n• {ex['asig']} ({ex['fecha']}):")
-                    print(f"  Debes dedicarle hoy: {debe}h")
-                
-                    if debe > puede:
-                        print(f"¡OJO! Este examen solo ya supera tus horas de hoy.")
-                 
-                    print("-" * 20)
-
-                else: 
-                    print(f"\n• {ex['asig']} ({ex['fecha']}):")
-                    print(f" ¡No es necesario que empieces a estudiar! Comienza dentro de {diasrestantes - diasminimos} días.")
+                        # horas de hoy / horas totales de estudio disponibles
+                        proporcion = puede / disponibilidad_estudio_total
+                        
+                        # Horas asignadas para este examen hoy
+                        horas_asignadas_hoy = ex['horas'] * proporcion
+                        
+                        # Evitar el estudia 0.01h. 
+                        if horas_asignadas_hoy >= MIN_HORAS_SESION:
+                            planificacion_hoy.append({
+                                'asig': ex['asig'],
+                                'horas': round(horas_asignadas_hoy, 1), #para redondear
+                                'faltan': dias_restantes,
+                                'fecha': ex['fecha']
+                            })
 
 
-            
-            # Resumen final 
-            print(f"\nTOTAL QUE DEBERÍAS ESTUDIAR HOY: {round(suma_debe, 1)}h") #round para no queden muchos decimales-
-            
-            if suma_debe > puede:
-                print(f"No te da tiempo. Te faltan {round(suma_debe - puede, 1)}h.")
-                print("Consejo: Quita horas de ocio y aprovecha bien el tiempo.")
+            # Escribir la planificación
+            if puede == 0:
+                print("\nHoy tienes 0 horas para estudiar.")
 
-            elif suma_debe == puede:
-                print("Las horas que debes de estudiar hoy son iguales a las que estás disponible.")
-                print("¡Qué bien planificado!")
-            
+            elif not planificacion_hoy:
+                print("\nAún falta un tiempo considerable para tus exámenes o el tiempo que el deberías de dedicar es insignificante.")
+                print("¡Disfruta!")
+                print("\nLos examenes futuros son:")
+                for ex in examenes_pendientes:    
+                    print(f"-{ex['asig']}: {ex['fecha']} (horas recomendadas por dificultad: {ex['horas']}.")
+
             else:
-                print(f"¡Plan perfecto! Te sobrarán {round(puede - suma_debe, 1)}h libres.")
+                print("Te recomendamos estudiar hoy:")
+                debe = 0
+                for plan in planificacion_hoy:
+                    print(f"\n· {plan['asig'].upper()} ({plan['fecha']}): {formatear_horas(plan['horas'])}h (faltan {plan['faltan']} días)") #.upper() para que esté el nombre en mayúsculas.
+                    if plan['horas'] > puede:
+                        print("  —> Cuidado, el tiempo que deberías dedicarle a este examen hoy ya sobre pasa todo tu tiempo disponible de hoy.")
+                    debe += plan['horas']
+                
+                # Alerta extra por si acumulas demasiados exámenes y se te exige más de lo que puedes dar hoy
+                if debe > puede:
+                    print(f"\nNota: La suma recomendada ({formatear_horas(round(debe, 1))}h) supera tus {puede}h reales de hoy.")
+                    print("Te sugerimos priorizar las asignaturas que te resulten más difíciles y quitar tiempo de ocio (¡lo agradecerás después!).")
 
+
+                elif debe == puede:
+                    print("\n¡Qué bien planificado! Justo tienes disponible las horas que te recomendamos estudiar.")
+
+                else:
+                    print(f"\n¡Plan perfecto! Te sobran {formatear_horas(puede - debe)} horas. ¡Disfruta del tiempo libre extra!")
 
         input("\nPresiona Enter para regresar al menú...")   
     
